@@ -15,7 +15,7 @@ fn main() -> std::io::Result<()> {
     let mut work_id = String::new();
     println!("Enter the work id: ");
     std::io::stdin().read_line(&mut work_id)?;
-    work_id.pop(); // Trim newline
+    work_id = work_id.trim().to_string();
     let url = format!(r"https://archiveofourown.org/works/{work_id}/navigate");
     println!("{url}");
     println!("{:?}", chapter_lengths(url, to_print));
