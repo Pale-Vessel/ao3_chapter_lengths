@@ -69,8 +69,6 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         chapters.push(chapter_length(chapter_link, chapter_index, to_print));
     }
 
-    maybe_print!(to_print, "{chapter_list:?}");
-
     chapters
 }
 
