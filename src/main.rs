@@ -52,7 +52,8 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
 
     let mut chapters = Vec::new();
 
-    for (chapter_index, chapter) in chapter_list.select(&LI_FINDER).enumerate() {
+    for (mut chapter_index, chapter) in chapter_list.select(&LI_FINDER).enumerate() {
+        chapter_index += 1;
         let relative = chapter
             .select(&A_FINDER)
             .next()
