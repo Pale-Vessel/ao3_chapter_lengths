@@ -1,4 +1,4 @@
-use scraper::Selector;
+use scraper::{Html, Selector};
 use std::sync::LazyLock;
 
 static OL_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("ol").unwrap());
@@ -41,7 +41,7 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
 
     maybe_print!(to_print, "got body");
 
-    let document = scraper::Html::parse_document(&html_body);
+    let document = Html::parse_document(&html_body);
 
     maybe_print!(to_print, "parsed document");
 
@@ -50,7 +50,7 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         .next()
         .expect("All chapter indices should have this element");
 
-    let mut chapters = Vec::with_capacity(500); // will be enough for almost all chapters, 2kB is basically nothing
+    let mut chapters = Vec::new();
 
     for (chapter_index, chapter) in chapter_list.select(&LI_FINDER).enumerate() {
         let relative = chapter
@@ -83,7 +83,7 @@ fn chapter_length(chapter_link: String, chapter_num: usize, to_print: bool) -> u
 
     maybe_print!(to_print, "got response from chapter {chapter_num}");
 
-    let document = scraper::Html::parse_document(&chapter_body);
+    let document = Html::parse_document(&chapter_body);
 
     maybe_print!(to_print, "parsed text of {chapter_num}");
 
