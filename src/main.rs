@@ -1,5 +1,5 @@
 use scraper::{Html, Selector};
-use std::sync::LazyLock;
+use std::{sync::LazyLock, thread, time::Duration};
 
 static OL_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("ol").unwrap());
 static LI_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("li").unwrap());
@@ -67,6 +67,7 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         let chapter_link = format!(r"https://archiveofourown.org{relative}");
 
         chapters.push(chapter_length(chapter_link, chapter_index, to_print));
+        thread::sleep(Duration::from_millis(500));
     }
 
     chapters
