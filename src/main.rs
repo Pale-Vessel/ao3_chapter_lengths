@@ -67,7 +67,7 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         let chapter_link = format!(r"https://archiveofourown.org{relative}");
 
         chapters.push(chapter_length(chapter_link, chapter_index, to_print));
-        thread::sleep(Duration::from_millis(500));
+        thread::sleep(Duration::from_secs_f32(0.5));
     }
 
     chapters
