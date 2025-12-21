@@ -69,7 +69,7 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         maybe_print!(to_print, "counted words for chapter {chapter_index}");
 
         chapters.push(chapter_length(chapter_link, chapter_index, to_print));
-        thread::sleep(Duration::from_secs_f32(0.5));
+        thread::sleep(Duration::from_secs(1));
     }
 
     chapters
