@@ -1,10 +1,13 @@
+#![deny(clippy::disallowed_methods)]
+
 use scraper::{Html, Selector};
 use std::{sync::LazyLock, thread, time::Duration};
 
 static OL_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("ol").unwrap());
 static LI_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("li").unwrap());
 static A_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("a").unwrap());
-static DIV_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("div").unwrap());
+static DIV_FINDER: LazyLock<Selector> =
+    LazyLock::new(|| scraper::Selector::parse(r#"div[role="article"]"#).unwrap());
 static P_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("p").unwrap());
 
 macro_rules! maybe_print {
@@ -57,16 +60,15 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         let relative = chapter
             .select(&A_FINDER)
             .next()
-            .unwrap()
+            .expect("Every element in this list should have a chapter link")
             .attr("href")
-            .unwrap()
+            .expect("Every link should have a href attr")
             .trim();
 
         maybe_print!(to_print, "about to count words for chapter {chapter_index}");
 
         let chapter_link = format!(r"https://archiveofourown.org{relative}");
 
-        
         chapters.push(chapter_length(chapter_link, chapter_index, to_print));
         maybe_print!(to_print, "counted words for chapter {chapter_index}");
         thread::sleep(Duration::from_secs(1));
@@ -91,8 +93,8 @@ fn chapter_length(chapter_link: String, chapter_num: usize, to_print: bool) -> u
 
     let chapter_text = document
         .select(&DIV_FINDER)
-        .find(|div| div.attr("role") == Some("article"))
-        .unwrap();
+        .next()
+        .expect("Every chapter should have an article section");
 
     let words = chapter_text
         .select(&P_FINDER)
