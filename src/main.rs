@@ -29,8 +29,8 @@ fn main() -> std::io::Result<()> {
     let work_id = work_id.trim().to_string();
     let url = format!(r"https://archiveofourown.org/works/{work_id}/navigate");
     maybe_print!(to_print, "{url}");
-    let l = chapter_lengths(url, to_print);
-    println!("{l:?} {}", l.iter().cloned().sum::<usize>());
+    let lengths = chapter_lengths(url, to_print);
+    println!("{lengths:?} {}", lengths.iter().cloned().sum::<usize>());
     Ok(())
 }
 
