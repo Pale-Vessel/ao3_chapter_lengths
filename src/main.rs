@@ -19,19 +19,24 @@ macro_rules! maybe_print {
 }
 
 fn main() -> std::io::Result<()> {
-    let mut to_print = String::new();
-    println!("Debug printing? y/n: ");
-    std::io::stdin().read_line(&mut to_print)?;
+    let to_print = input("Debug printing? y/n: ")?;
     let to_print = to_print.trim() == "y";
-    let mut work_id = String::new();
-    println!("Enter the work id: ");
-    std::io::stdin().read_line(&mut work_id)?;
-    let work_id = work_id.trim().to_string();
+
+    let work_id = input("Enter the work id: ")?.trim().to_string();
     let url = format!(r"https://archiveofourown.org/works/{work_id}/navigate");
+
     maybe_print!(to_print, "{url}");
+
     let lengths = chapter_lengths(url, to_print);
     println!("{lengths:?} {}", lengths.iter().cloned().sum::<usize>());
     Ok(())
+}
+
+fn input(prompt: &str) -> std::io::Result<String> {
+    let mut output = String::new();
+    println!("{prompt}");
+    std::io::stdin().read_line(&mut output)?;
+    Ok(output)
 }
 
 fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
