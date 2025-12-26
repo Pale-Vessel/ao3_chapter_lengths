@@ -1,11 +1,8 @@
 #![deny(clippy::disallowed_methods)]
 
 use scraper::{Html, Selector};
-use std::{sync::LazyLock, thread, time::Duration};
+use std::sync::LazyLock;
 
-static OL_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("ol").unwrap());
-static LI_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("li").unwrap());
-static A_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("a").unwrap());
 static DIV_FINDER: LazyLock<Selector> =
     LazyLock::new(|| scraper::Selector::parse(r#"div[role="article"]"#).unwrap());
 static P_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("p").unwrap());
@@ -23,7 +20,7 @@ fn main() -> std::io::Result<()> {
     let to_print = to_print.trim() == "y";
 
     let work_id = input("Enter the work id: ")?.trim().to_string();
-    let url = format!(r"https://archiveofourown.org/works/{work_id}/navigate");
+    let url = format!(r"https://archiveofourown.org/works/{work_id}?view_full_work=true");
 
     maybe_print!(to_print, "{url}");
 
@@ -53,59 +50,18 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
 
     maybe_print!(to_print, "parsed document");
 
-    let chapter_list = document
-        .select(&OL_FINDER)
-        .next()
-        .expect("All chapter indices should have this element");
-
-    let mut chapters = Vec::new();
-
-    for (mut chapter_index, chapter) in chapter_list.select(&LI_FINDER).enumerate() {
-        chapter_index += 1;
-        let relative = chapter
-            .select(&A_FINDER)
-            .next()
-            .expect("Every element in this list should have a chapter link")
-            .attr("href")
-            .expect("Every link should have a href attr")
-            .trim();
-
-        maybe_print!(to_print, "about to count words for chapter {chapter_index}");
-
-        let chapter_link = format!(r"https://archiveofourown.org{relative}");
-
-        chapters.push(chapter_length(chapter_link, chapter_index, to_print));
-        maybe_print!(to_print, "counted words for chapter {chapter_index}");
-        thread::sleep(Duration::from_secs(1));
-    }
+    let chapters = document.select(&DIV_FINDER);
 
     chapters
-}
+        .skip(1)
+        .map(|chapter_text| {
+            let words = chapter_text
+                .select(&P_FINDER)
+                .map(|p| p.text().collect::<String>())
+                .collect::<Vec<String>>()
+                .join(" ");
 
-fn chapter_length(chapter_link: String, chapter_num: usize, to_print: bool) -> usize {
-    let chapter_body = ureq::get(chapter_link)
-        .call()
-        .expect("Couldn't call url")
-        .body_mut()
-        .read_to_string()
-        .unwrap();
-
-    maybe_print!(to_print, "got response from chapter {chapter_num}");
-
-    let document = Html::parse_document(&chapter_body);
-
-    maybe_print!(to_print, "parsed text of {chapter_num}");
-
-    let chapter_text = document
-        .select(&DIV_FINDER)
-        .next()
-        .expect("Every chapter should have an article section");
-
-    let words = chapter_text
-        .select(&P_FINDER)
-        .map(|p| p.text().collect::<String>())
-        .collect::<Vec<String>>()
-        .join(" ");
-
-    words.replace("—", " ").split_whitespace().count()
+            words.replace("—", " ").split_whitespace().count()
+        })
+        .collect()
 }
