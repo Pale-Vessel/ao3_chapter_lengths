@@ -1,3 +1,4 @@
 disallowed-methods = [
-    "std::option::Option::unwrap"
+    "std::option::Option::unwrap",
+    "std::result::Result::unwrap",
 ]
