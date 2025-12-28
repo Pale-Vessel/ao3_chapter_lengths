@@ -4,8 +4,9 @@ use scraper::{Html, Selector};
 use std::sync::LazyLock;
 
 static DIV_FINDER: LazyLock<Selector> =
-    LazyLock::new(|| scraper::Selector::parse(r#"div[role="article"]"#).unwrap());
-static P_FINDER: LazyLock<Selector> = LazyLock::new(|| scraper::Selector::parse("p").unwrap());
+    LazyLock::new(|| scraper::Selector::parse(r#"div[role="article"]"#).expect("This is valid"));
+static P_FINDER: LazyLock<Selector> =
+    LazyLock::new(|| scraper::Selector::parse("p").expect("This is valid"));
 
 macro_rules! maybe_print {
     ($cond: expr, $($print: expr), *) => {
@@ -53,7 +54,7 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         .expect("Couldn't call url")
         .body_mut()
         .read_to_string()
-        .unwrap();
+        .expect("Should be able to read html to string");
 
     maybe_print!(to_print, "got body");
 
