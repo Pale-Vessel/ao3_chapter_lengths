@@ -28,7 +28,7 @@ fn main() -> std::io::Result<()> {
             .expect("An ao3 link with https at the start should have enough components"),
         "archi" => id_input
             .split("/")
-            .nth(3)
+            .nth(2)
             .expect("An ao3 link should have enough components"),
         _ => &id_input,
     };
