@@ -19,7 +19,18 @@ fn main() -> std::io::Result<()> {
     let to_print = input("Debug printing? y/n: ")?;
     let to_print = to_print.trim() == "y";
 
-    let work_id = input("Enter the work id: ")?.trim().to_string();
+    let id_input = input("Enter the work id or url: ")?.trim().to_string();
+    let work_id = match &id_input[..5] {
+        "https" => id_input
+            .split("/")
+            .nth(4)
+            .expect("An ao3 link with https at the start should have enough components"),
+        "archi" => id_input
+            .split("/")
+            .nth(3)
+            .expect("An ao3 link should have enough components"),
+        _ => &id_input,
+    };
     let url = format!(r"https://archiveofourown.org/works/{work_id}?view_full_work=true");
 
     maybe_print!(to_print, "{url}");
