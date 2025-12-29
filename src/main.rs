@@ -37,7 +37,7 @@ fn main() -> std::io::Result<()> {
     maybe_print!(to_print, "{url}");
 
     let lengths = chapter_lengths(url, to_print);
-    println!("{lengths:?} {}", lengths.iter().cloned().sum::<usize>());
+    println!("{:?} {}", &lengths[1..], lengths[0]);
     Ok(())
 }
 
@@ -64,8 +64,11 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
 
     let chapters = document.select(&DIV_FINDER);
 
+    let k = chapters.clone();
+    println!("{:?}", k.collect::<Vec<_>>());
+
     chapters
-        .skip(1)
+        //.skip(1)
         .map(|chapter_text| {
             let words = chapter_text
                 .select(&P_FINDER)
