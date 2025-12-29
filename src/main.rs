@@ -37,7 +37,12 @@ fn main() -> std::io::Result<()> {
     maybe_print!(to_print, "{url}");
 
     let lengths = chapter_lengths(url, to_print);
-    println!("{:?} {}", &lengths[1..], lengths[0]);
+
+    match lengths.len() {
+        0 => panic!("Failed to get chapters properly - this work can't be measured"),
+        1 => println!("{lengths:?}"),
+        _ => println!("{:?} {}", &lengths[1..], lengths[0]),
+    }
     Ok(())
 }
 
