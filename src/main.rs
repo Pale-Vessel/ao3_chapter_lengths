@@ -21,12 +21,12 @@ fn main() -> std::io::Result<()> {
     let to_print = to_print.trim() == "y";
 
     let id_input = input("Enter the work id or url: ")?.trim().to_string();
-    let work_id = match &id_input[..5] {
-        "https" => id_input
+    let work_id = match &id_input.get(..5) {
+        Some("https") => id_input
             .split("/")
             .nth(4)
             .expect("An ao3 link with https at the start should have enough components"),
-        "archi" => id_input
+        Some("archi") => id_input
             .split("/")
             .nth(2)
             .expect("An ao3 link should have enough components"),
