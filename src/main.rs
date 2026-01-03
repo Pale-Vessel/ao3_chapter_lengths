@@ -11,7 +11,7 @@ static P_FINDER: LazyLock<Selector> =
 fn main() -> std::io::Result<()> {
     let id_input = input("Enter the work id or url: ")?.trim().to_string();
     let work_id = match &id_input.get(..5) {
-        Some("https") => id_input
+        Some("https") | Some("http") => id_input
             .split("/")
             .nth(4)
             .expect("An ao3 link with https at the start should have enough components"),
@@ -21,13 +21,16 @@ fn main() -> std::io::Result<()> {
             .expect("An ao3 link should have enough components"),
         _ => &id_input,
     };
-    let url = format!(r"https://archiveofourown.org/works/{work_id}?view_full_work=true");
+    // Trim off `view_full_work` if present
+    let work_id = work_id.split_once("?").map_or(work_id, |pair| pair.0); 
+    let url = format!("https://archiveofourown.org/works/{work_id}?view_full_work=true");
 
     let lengths = chapter_lengths(url);
 
     match lengths.len() {
         0 => panic!("Failed to get chapters properly - this work can't be measured"),
         1 => println!("{lengths:?}"),
+        // The "first" chapter is the full length of the work, the rest are individual chapters
         _ => println!("{:?} {}", &lengths[1..], lengths[0]),
     }
     Ok(())
@@ -43,7 +46,7 @@ fn input(prompt: &str) -> std::io::Result<String> {
 fn chapter_lengths(url: String) -> Vec<usize> {
     let html_body = String::from_utf8(
         std::process::Command::new("curl")
-            .args(["-http2", &url])
+            .args(["--http2", &url])
             .output()
             .expect("Curl command failed")
             .stdout,
@@ -55,7 +58,6 @@ fn chapter_lengths(url: String) -> Vec<usize> {
     let chapters = document.select(&DIV_FINDER);
 
     chapters
-        //.skip(1)
         .map(|chapter_text| {
             let words = chapter_text
                 .select(&P_FINDER)
