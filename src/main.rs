@@ -8,19 +8,7 @@ static DIV_FINDER: LazyLock<Selector> =
 static P_FINDER: LazyLock<Selector> =
     LazyLock::new(|| scraper::Selector::parse("p").expect("This is valid"));
 
-macro_rules! maybe_print {
-    ($cond: expr, $($print: expr), *) => {
-        if $cond {
-            println!($($print),*)
-        }
-    };
-}
-
-fn main() -> std::io::Result<()> {
-    let to_print = input("Debug printing? y/n: ")?;
-    let to_print = to_print.trim() == "y";
-
-    let id_input = input("Enter the work id or url: ")?.trim().to_string();
+fn main() -> std::io::Result<()> {let id_input = input("Enter the work id or url: ")?.trim().to_string();
     let work_id = match &id_input.get(..5) {
         Some("https") => id_input
             .split("/")
@@ -34,9 +22,7 @@ fn main() -> std::io::Result<()> {
     };
     let url = format!(r"https://archiveofourown.org/works/{work_id}?view_full_work=true");
 
-    maybe_print!(to_print, "{url}");
-
-    let lengths = chapter_lengths(url, to_print);
+    let lengths = chapter_lengths(url);
 
     match lengths.len() {
         0 => panic!("Failed to get chapters properly - this work can't be measured"),
@@ -53,7 +39,7 @@ fn input(prompt: &str) -> std::io::Result<String> {
     Ok(output)
 }
 
-fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
+fn chapter_lengths(url: String) -> Vec<usize> {
     let html_body = ureq::get(url)
         .call()
         .expect("Couldn't call url")
@@ -61,11 +47,7 @@ fn chapter_lengths(url: String, to_print: bool) -> Vec<usize> {
         .read_to_string()
         .expect("Should be able to read html to string");
 
-    maybe_print!(to_print, "got body");
-
     let document = Html::parse_document(&html_body);
-
-    maybe_print!(to_print, "parsed document");
 
     let chapters = document.select(&DIV_FINDER);
 
