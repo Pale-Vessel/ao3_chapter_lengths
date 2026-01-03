@@ -8,7 +8,8 @@ static DIV_FINDER: LazyLock<Selector> =
 static P_FINDER: LazyLock<Selector> =
     LazyLock::new(|| scraper::Selector::parse("p").expect("This is valid"));
 
-fn main() -> std::io::Result<()> {let id_input = input("Enter the work id or url: ")?.trim().to_string();
+fn main() -> std::io::Result<()> {
+    let id_input = input("Enter the work id or url: ")?.trim().to_string();
     let work_id = match &id_input.get(..5) {
         Some("https") => id_input
             .split("/")
