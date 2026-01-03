@@ -2,6 +2,7 @@
 
 use scraper::{Html, Selector};
 use std::sync::LazyLock;
+use ureq::http::Version;
 
 static DIV_FINDER: LazyLock<Selector> =
     LazyLock::new(|| scraper::Selector::parse(r#"div[role="article"]"#).expect("This is valid"));
@@ -41,12 +42,14 @@ fn input(prompt: &str) -> std::io::Result<String> {
 }
 
 fn chapter_lengths(url: String) -> Vec<usize> {
-    let html_body = ureq::get(url)
-        .call()
-        .expect("Couldn't call url")
-        .body_mut()
-        .read_to_string()
-        .expect("Should be able to read html to string");
+    let html_body = String::from_utf8(
+        std::process::Command::new("curl")
+            .args(["-http2", &url])
+            .output()
+            .expect("Curl command failed")
+            .stdout,
+    )
+    .expect("Failed to read to string");
 
     let document = Html::parse_document(&html_body);
 
