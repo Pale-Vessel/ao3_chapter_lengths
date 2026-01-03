@@ -1,7 +1,11 @@
 [package]
 name = "ao3_chapter_lengths"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["Vessel <waspsting@duck.com>"]
+license = "MIT OR Apache-2.0"  
+description = "Tool to analyze chapter lengths on AO3"
+repository = "https://github.com/Pale-Vessel/ao3_chapter_lengths"
 
 [dependencies]
 scraper = { version = "0.25.0", default-features = false }
