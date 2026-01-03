@@ -22,7 +22,7 @@ fn main() -> std::io::Result<()> {
         _ => &id_input,
     };
     // Trim off `view_full_work` if present
-    let work_id = work_id.split_once("?").map_or(work_id, |pair| pair.0); 
+    let work_id = work_id.split_once("?").map_or(work_id, |pair| pair.0);
     let url = format!("https://archiveofourown.org/works/{work_id}?view_full_work=true");
 
     let lengths = chapter_lengths(url);
