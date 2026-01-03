@@ -43,19 +43,42 @@ fn input(prompt: &str) -> std::io::Result<String> {
     Ok(output)
 }
 
-fn chapter_lengths(url: String) -> Vec<usize> {
+fn get_document_ureq(url: &str) -> Html {
+    let html_body = ureq::get(url)
+        .call()
+        .expect("Couldn't call url")
+        .body_mut()
+        .read_to_string()
+        .expect("Should be able to read html to string");
+    Html::parse_document(&html_body)
+}
+
+fn get_document_curl(url: &str) -> Html {
     let html_body = String::from_utf8(
         std::process::Command::new("curl")
-            .args(["--http2", &url])
+            .args(["--http2", url])
             .output()
             .expect("Curl command failed")
             .stdout,
     )
     .expect("Failed to read to string");
 
-    let document = Html::parse_document(&html_body);
+    Html::parse_document(&html_body)
+}
 
-    let chapters = document.select(&DIV_FINDER);
+fn chapter_lengths(url: String) -> Vec<usize> {
+    let document = get_document_ureq(&url);
+    let document_curl;
+
+    let chapters = {
+        let ureq_chapters = document.select(&DIV_FINDER);
+        if ureq_chapters.clone().count() == 0 {
+            document_curl = get_document_curl(&url);
+            document_curl.select(&DIV_FINDER)
+        } else {
+            ureq_chapters
+        }
+    };
 
     chapters
         .map(|chapter_text| {
