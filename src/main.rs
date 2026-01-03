@@ -2,7 +2,6 @@
 
 use scraper::{Html, Selector};
 use std::sync::LazyLock;
-use ureq::http::Version;
 
 static DIV_FINDER: LazyLock<Selector> =
     LazyLock::new(|| scraper::Selector::parse(r#"div[role="article"]"#).expect("This is valid"));
@@ -54,9 +53,6 @@ fn chapter_lengths(url: String) -> Vec<usize> {
     let document = Html::parse_document(&html_body);
 
     let chapters = document.select(&DIV_FINDER);
-
-    let k = chapters.clone();
-    println!("{:?}", k.collect::<Vec<_>>());
 
     chapters
         //.skip(1)
