@@ -67,18 +67,22 @@ fn get_document_curl(url: &str) -> Html {
 }
 
 fn chapter_lengths(url: String) -> Vec<usize> {
+    println!("Getting webpage...");
     let document = get_document_ureq(&url);
     let document_curl;
 
     let chapters = {
         let ureq_chapters = document.select(&DIV_FINDER);
         if ureq_chapters.clone().count() == 0 {
+            println!("Ureq failed, falling back to curl...");
             document_curl = get_document_curl(&url);
             document_curl.select(&DIV_FINDER)
         } else {
             ureq_chapters
         }
     };
+
+    println!("Got document, counting chapters...");
 
     chapters
         .map(|chapter_text| {
@@ -87,7 +91,7 @@ fn chapter_lengths(url: String) -> Vec<usize> {
                 .map(|p| p.text().collect::<String>())
                 .collect::<Vec<String>>()
                 .join(" ");
-
+            
             words.replace("—", " ").split_whitespace().count()
         })
         .collect()
