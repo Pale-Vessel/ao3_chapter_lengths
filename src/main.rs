@@ -21,9 +21,9 @@ fn main() -> std::io::Result<()> {
             .expect("An ao3 link should have enough components"),
         _ => &id_input,
     };
-    // Trim off `view_full_work` if present
+    // Trim off optional url parameters if present
     let work_id = work_id.split_once("?").map_or(work_id, |pair| pair.0);
-    let url = format!("https://archiveofourown.org/works/{work_id}?view_full_work=true");
+    let url = format!("https://archiveofourown.org/works/{work_id}?view_adult=true&view_full_work=true");
 
     let lengths = chapter_lengths(url);
 
@@ -53,35 +53,10 @@ fn get_document_ureq(url: &str) -> Html {
     Html::parse_document(&html_body)
 }
 
-fn get_document_curl(url: &str) -> Html {
-    let html_body = String::from_utf8(
-        std::process::Command::new("curl")
-            .args(["--http2", url])
-            .output()
-            .expect("Curl command failed")
-            .stdout,
-    )
-    .expect("Failed to read to string");
-
-    Html::parse_document(&html_body)
-}
-
 fn chapter_lengths(url: String) -> Vec<usize> {
     println!("Getting webpage...");
     let document = get_document_ureq(&url);
-    let document_curl;
-
-    let chapters = {
-        let ureq_chapters = document.select(&DIV_FINDER);
-        if ureq_chapters.clone().count() == 0 {
-            println!("Ureq failed, falling back to curl...");
-            document_curl = get_document_curl(&url);
-            document_curl.select(&DIV_FINDER)
-        } else {
-            ureq_chapters
-        }
-    };
-
+    let chapters =  document.select(&DIV_FINDER);
     println!("Got document, counting chapters...");
 
     chapters
