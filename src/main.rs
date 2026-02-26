@@ -9,7 +9,11 @@ static P_FINDER: LazyLock<Selector> =
     LazyLock::new(|| scraper::Selector::parse("p").expect("This is valid"));
 
 fn main() -> std::io::Result<()> {
-    let id_input = input("Enter the work id or url: ")?.trim().to_string();
+    let id_input = std::env::args()
+        .collect::<Vec<_>>()
+        .get(1)
+        .expect("No work url was passed in")
+        .clone();
     let work_id = match &id_input.get(..5) {
         Some("https") | Some("http") => id_input
             .split("/")
@@ -23,7 +27,8 @@ fn main() -> std::io::Result<()> {
     };
     // Trim off optional url parameters if present
     let work_id = work_id.split_once("?").map_or(work_id, |pair| pair.0);
-    let url = format!("https://archiveofourown.org/works/{work_id}?view_adult=true&view_full_work=true");
+    let url =
+        format!("https://archiveofourown.org/works/{work_id}?view_adult=true&view_full_work=true");
 
     let lengths = chapter_lengths(url);
 
@@ -34,13 +39,6 @@ fn main() -> std::io::Result<()> {
         _ => println!("{:?} {}", &lengths[1..], lengths[0]),
     }
     Ok(())
-}
-
-fn input(prompt: &str) -> std::io::Result<String> {
-    let mut output = String::new();
-    println!("{prompt}");
-    std::io::stdin().read_line(&mut output)?;
-    Ok(output)
 }
 
 fn get_document_ureq(url: &str) -> Html {
@@ -56,7 +54,7 @@ fn get_document_ureq(url: &str) -> Html {
 fn chapter_lengths(url: String) -> Vec<usize> {
     println!("Getting webpage...");
     let document = get_document_ureq(&url);
-    let chapters =  document.select(&DIV_FINDER);
+    let chapters = document.select(&DIV_FINDER);
     println!("Got document, counting chapters...");
 
     chapters
@@ -66,7 +64,7 @@ fn chapter_lengths(url: String) -> Vec<usize> {
                 .map(|p| p.text().collect::<String>())
                 .collect::<Vec<String>>()
                 .join(" ");
-            
+
             words.replace("—", " ").split_whitespace().count()
         })
         .collect()
