@@ -41,7 +41,7 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-fn get_document_ureq(url: &str) -> Html {
+fn get_document(url: &str) -> Html {
     let html_body = ureq::get(url)
         .call()
         .expect("Couldn't call url")
@@ -53,7 +53,7 @@ fn get_document_ureq(url: &str) -> Html {
 
 fn chapter_lengths(url: String) -> Vec<usize> {
     println!("Getting webpage...");
-    let document = get_document_ureq(&url);
+    let document = get_document(&url);
     let chapters = document.select(&DIV_FINDER);
     println!("Got document, counting chapters...");
 
